@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GPT Voice Bridge - Setup Guide</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      line-height: 1.6;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      color: #764ba2;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+    
+    h2 {
+      color: #667eea;
+      margin-top: 30px;
+    }
+    
+    .step {
+      background: #f5f5f5;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      border-left: 5px solid #667eea;
+    }
+    
+    code {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .highlight {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 5px solid #ffc107;
+      margin: 15px 0;
+    }
+    
+    .success {
+      background: #d4edda;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 5px solid #28a745;
+      margin: 15px 0;
+    }
+    
+    ul {
+      line-height: 2;
+    }
+    
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 10px 10px 10px 0;
+      transition: transform 0.3s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎭 GPT Voice Bridge - Setup Guide</h1>
+    
+    <p><strong>Welcome!</strong> This extension lets your GPT characters automatically speak with their unique voices in Zoom meetings. No more copying and pasting!</p>
+    
+    <h2>📋 Quick Setup (5 minutes)</h2>
+    
+    <div class="step">
+      <h3>Step 1: Get Your ttsMP3 API Key</h3>
+      <ol>
+        <li>Go to <a href="https://ttsmp3.com/register" target="_blank">ttsMP3.com/register</a></li>
+        <li>Purchase a 1-year plan (API access included)</li>
+        <li>Email <strong>support@ttsmp3.com</strong> requesting your API key</li>
+        <li>They'll send you an API key within 24 hours</li>
+      </ol>
+    </div>
+    
+    <div class="step">
+      <h3>Step 2: Install Virtual Audio Device</h3>
+      <p><strong>Why?</strong> This lets Zoom "hear" the character voices from your browser.</p>
+      
+      <p><strong>Windows:</strong></p>
+      <ul>
+        <li>Download <a href="https://vb-audio.com/Cable/" target="_blank">VB-Audio Virtual Cable</a> (free)</li>
+        <li>Install and restart your computer</li>
+      </ul>
+      
+      <p><strong>Mac:</strong></p>
+      <ul>
+        <li>Download <a href="https://existential.audio/blackhole/" target="_blank">BlackHole</a> (free)</li>
+        <li>Install and grant audio permissions</li>
+      </ul>
+      
+      <p><strong>Linux:</strong></p>
+      <div class="code-block">
+pactl load-module module-null-sink sink_name=virtual_audio
+      </div>
+    </div>
+    
+    <div class="step">
+      <h3>Step 3: Configure the Extension</h3>
+      <ol>
+        <li>Click the extension icon in your browser toolbar</li>
+        <li>Enter your ttsMP3 API key</li>
+        <li>Make sure "Auto-Voice Enabled" is ON</li>
+        <li>Click "Save Settings"</li>
+        <li>Click "Test Voice" to verify it works</li>
+      </ol>
+    </div>
+    
+    <div class="step">
+      <h3>Step 4: Set Up Zoom Audio</h3>
+      <ol>
+        <li>Open Zoom settings → Audio</li>
+        <li>Set <strong>Microphone</strong> to your virtual audio device:
+          <ul>
+            <li>Windows: "CABLE Output (VB-Audio Virtual Cable)"</li>
+            <li>Mac: "BlackHole 2ch"</li>
+            <li>Linux: "virtual_audio"</li>
+          </ul>
+        </li>
+        <li>Test with "Test Microphone" - you should see audio levels when characters speak</li>
+      </ol>
+      
+      <div class="highlight">
+        <strong>💡 Pro Tip:</strong> Set your system's default audio output to the virtual device, so ALL browser audio (including character voices) goes to Zoom.
+      </div>
+    </div>
+    
+    <h2>🎬 How to Use</h2>
+    
+    <div class="step">
+      <h3>Format Your GPT Responses</h3>
+      <p>In your custom GPT's instructions, tell it to format character dialogue like this:</p>
+      <div class="code-block">
+[CHARACTER: Viki] Well hello there, love! Ready to chat about your story?
+
+[CHARACTER: Kira] I've got some sassy insights for you!
+
+[CHARACTER: Chuck] Let me protect you from plot holes...
+      </div>
+      
+      <p><strong>The extension automatically detects these patterns:</strong></p>
+      <ul>
+        <li><code>[CHARACTER: Name] dialogue</code></li>
+        <li><code>**Name:** dialogue</code></li>
+        <li><code>[Name]: dialogue</code></li>
+        <li><code>Name: dialogue</code> (at start of line)</li>
+      </ul>
+    </div>
+    
+    <div class="step">
+      <h3>Talk to Your Characters</h3>
+      <ol>
+        <li>Start a Zoom meeting (or join one)</li>
+        <li>Open ChatGPT with your custom GPT</li>
+        <li>Ask your characters questions</li>
+        <li>When they respond, their voice automatically plays</li>
+        <li>Zoom participants hear the characters speaking!</li>
+      </ol>
+      
+      <div class="success">
+        <strong>✨ That's it!</strong> No copying, no pasting. Just talk to your characters and they speak automatically.
+      </div>
+    </div>
+    
+    <h2>🎭 Character Voices</h2>
+    
+    <p>The extension uses these default voice mappings:</p>
+    
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+      <tr style="background: #667eea; color: white;">
+        <th style="padding: 10px; text-align: left;">Character</th>
+        <th style="padding: 10px; text-align: left;">Voice</th>
+        <th style="padding: 10px; text-align: left;">Accent</th>
+      </tr>
+      <tr style="background: #f5f5f5;">
+        <td style="padding: 10px;">Viki</td>
+        <td style="padding: 10px;">Amy</td>
+        <td style="padding: 10px;">British Female</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">Kira</td>
+        <td style="padding: 10px;">Joanna</td>
+        <td style="padding: 10px;">American Female</td>
+      </tr>
+      <tr style="background: #f5f5f5;">
+        <td style="padding: 10px;">Chuck</td>
+        <td style="padding: 10px;">Brian</td>
+        <td style="padding: 10px;">British Male</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px;">Fin</td>
+        <td style="padding: 10px;">Matthew</td>
+        <td style="padding: 10px;">American Male</td>
+      </tr>
+      <tr style="background: #f5f5f5;">
+        <td style="padding: 10px;">Charlie</td>
+        <td style="padding: 10px;">Russell</td>
+        <td style="padding: 10px;">Australian Male</td>
+      </tr>
+    </table>
+    
+    <h2>⚙️ Advanced: Custom Character Voices</h2>
+    
+    <p>Want to use different voices? You can modify <code>content.js</code> in the extension folder:</p>
+    
+    <div class="code-block">
+const defaultVoices = {
+  'YourCharacter': 'Ivy',     // American female
+  'AnotherOne': 'Joey',        // American male
+  'ThirdCharacter': 'Mizuki'   // Japanese female
+};
+    </div>
+    
+    <p>Available voices: Joanna, Matthew, Ivy, Joey, Justin, Kendra, Amy, Brian, Emma, Geraint, Russell, Nicole, Olivia, Aria, Ayanda, and many more!</p>
+    
+    <h2>🐛 Troubleshooting</h2>
+    
+    <div class="step">
+      <h3>No Audio in Zoom</h3>
+      <ul>
+        <li>✓ Check Zoom microphone is set to virtual audio device</li>
+        <li>✓ Test with "Test Microphone" in Zoom settings</li>
+        <li>✓ Ensure browser isn't muted</li>
+        <li>✓ Try restarting Zoom after changing audio settings</li>
+      </ul>
+    </div>
+    
+    <div class="step">
+      <h3>Extension Not Detecting Characters</h3>
+      <ul>
+        <li>✓ Refresh the ChatGPT page</li>
+        <li>✓ Check that dialogue uses correct format: <code>[CHARACTER: Name]</code></li>
+        <li>✓ Make sure Auto-Voice is enabled in extension popup</li>
+        <li>✓ Check browser console (F12) for error messages</li>
+      </ul>
+    </div>
+    
+    <div class="step">
+      <h3>Quota Exceeded Error</h3>
+      <ul>
+        <li>✓ You've used your ttsMP3 character quota</li>
+        <li>✓ Upgrade your plan or wait for monthly reset</li>
+        <li>✓ Contact ttsMP3 support for account details</li>
+      </ul>
+    </div>
+    
+    <h2>📚 Resources</h2>
+    
+    <a href="https://ttsmp3.com/apidoc" target="_blank" class="btn">ttsMP3 API Docs</a>
+    <a href="https://vb-audio.com/Cable/" target="_blank" class="btn">VB-Audio Cable</a>
+    <a href="https://existential.audio/blackhole/" target="_blank" class="btn">BlackHole (Mac)</a>
+    
+    <h2>💬 Need Help?</h2>
+    
+    <p>If you're stuck:</p>
+    <ul>
+      <li>Check the browser console (F12) for errors</li>
+      <li>Make sure all steps above are completed</li>
+      <li>Contact ttsMP3 support for API issues</li>
+      <li>Try the extension on a fresh ChatGPT conversation</li>
+    </ul>
+    
+    <div class="success" style="margin-top: 40px;">
+      <h3>🎉 You're All Set!</h3>
+      <p>Your characters are ready to speak. Head to ChatGPT, start a Zoom call, and have a conversation with your book characters!</p>
+    </div>
+  </div>
+</body>
+</html>

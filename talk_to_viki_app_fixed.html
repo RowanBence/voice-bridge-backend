@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✨ Let's Talk to the Council</title>
+  <style>
+    body {
+      background: #0e0b1d;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      text-align: center;
+    }
+    select, input, button {
+      margin: 0.5rem;
+      padding: 0.7rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
+    input[type="text"] {
+      width: 300px;
+    }
+    button {
+      background-color: #a46af1;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #915de3;
+    }
+    button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+    .conversation-log {
+      background: #1d1731;
+      padding: 1rem;
+      margin-top: 2rem;
+      border-radius: 12px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .conversation-log div {
+      margin-bottom: 0.8rem;
+    }
+    .system { color: #ccc; }
+    .you { color: #6ec1e4; }
+    .response { color: #f5a9b8; }
+    .error { color: #ff6b6b; }
+    .api-section {
+      background: #1d1731;
+      padding: 1rem;
+      margin: 1rem auto;
+      border-radius: 12px;
+      max-width: 600px;
+    }
+    .api-section h3 {
+      margin-top: 0;
+      color: #a46af1;
+    }
+    audio {
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>✨ Let's Talk to the Council</h1>
+
+  <div class="api-section">
+    <h3>API Configuration</h3>
+    <input type="text" id="openaiKey" placeholder="Enter OpenAI API Key (sk-...)" /><br>
+    <input type="text" id="ttsmp3Key" placeholder="Enter ttsMP3.com API Key" /><br>
+  </div>
+
+  <select id="character">
+    <option value="Viki">Viki (British Female)</option>
+    <option value="Kira">Kira (American Female)</option>
+    <option value="Chuck">Echo Chuck (British Male)</option>
+    <option value="Fin">Whisper Fin (American Male)</option>
+    <option value="Charlie">Charlie (Australian Male)</option>
+  </select><br>
+  
+  <input type="text" id="userInput" placeholder="Say something..." />
+  <button id="talkBtn" onclick="handleTalkClick()">Talk</button>
+
+  <p id="replyOutput">System: Ready to chat.</p>
+
+  <!-- Hidden audio player for playing TTS -->
+  <audio id="audioPlayer" controls class="hidden"></audio>
+
+  <div id="chatLog" class="conversation-log">
+    <div class="system">System: Ready to chat with the Council. Configure your API keys above.</div>
+  </div>
+
+<script>
+  const memory = [];
+
+  // Map characters to their personas and ttsMP3 voices
+  const characterMap = {
+    Viki: {
+      persona: 'Witty Northern queen with warmth, empathy, and sparkle. Leeds accent, full of character and cheeky humour.',
+      voice: 'Amy' // British English female
+    },
+    Kira: {
+      persona: 'Warm, sassy, intuitive guide. Encouraging, witty, and stylish.',
+      voice: 'Joanna' // American English female
+    },
+    Chuck: {
+      persona: 'Calm, observant, and protective. Acts as a guardian and gatekeeper.',
+      voice: 'Brian' // British English male
+    },
+    Fin: {
+      persona: 'Gentle, cosmic, and supportive – a whisper through the stars.',
+      voice: 'Matthew' // American English male
+    },
+    Charlie: {
+      persona: 'Insightful, grounded, and loyal to story canon.',
+      voice: 'Russell' // Australian English male
+    }
+  };
+
+  async function fetchOpenAIReply(userInput, personaPrompt, memoryInput, apiKeyInput) {
+    const messages = [
+      { role: 'system', content: personaPrompt },
+      ...memoryInput.map(m => ({ role: 'assistant', content: m })),
+      { role: 'user', content: userInput },
+    ];
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKeyInput}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`OpenAI Error ${response.status}: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim();
+  }
+
+  async function generateTTSMP3Audio(text, speaker, apiKey) {
+    const formData = new URLSearchParams();
+    formData.append('apikey', apiKey);
+    formData.append('speaker', speaker);
+    formData.append('text', text);
+
+    const response = await fetch('https://api.ttsmp3.com/v1/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`ttsMP3 Error ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // Check for API-specific errors
+    if (data.status === 320) {
+      throw new Error('ttsMP3: Quota exceeded. Please check your account.');
+    }
+    
+    if (!data.data || !data.data.URL) {
+      throw new Error('ttsMP3: No audio URL returned. Check your API key and quota.');
+    }
+
+    return data.data.URL;
+  }
+
+  function logMessage(className, label, text) {
+    const logBox = document.getElementById('chatLog');
+    const msg = document.createElement('div');
+    msg.className = className;
+    msg.innerHTML = `<strong>${label}:</strong> ${text}`;
+    logBox.appendChild(msg);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function playAudio(audioUrl) {
+    const audioPlayer = document.getElementById('audioPlayer');
+    audioPlayer.src = audioUrl;
+    audioPlayer.classList.remove('hidden');
+    audioPlayer.play().catch(e => {
+      console.error('Audio playback failed:', e);
+      logMessage('error', 'Error', 'Failed to play audio. Check browser permissions.');
+    });
+  }
+
+  async function handleTalkClick() {
+    const openaiKey = document.getElementById('openaiKey').value.trim();
+    const ttsmp3Key = document.getElementById('ttsmp3Key').value.trim();
+    const userInput = document.getElementById('userInput').value.trim();
+    const selectedChar = document.getElementById('character').value;
+    const output = document.getElementById('replyOutput');
+    const talkBtn = document.getElementById('talkBtn');
+
+    // Validation
+    if (!openaiKey) {
+      alert('Please enter your OpenAI API key.');
+      return;
+    }
+
+    if (!ttsmp3Key) {
+      alert('Please enter your ttsMP3.com API key.');
+      return;
+    }
+
+    if (!userInput) {
+      alert('Please enter a message.');
+      return;
+    }
+
+    // Disable button during processing
+    talkBtn.disabled = true;
+
+    try {
+      // Log user message
+      logMessage('you', 'You', userInput);
+      output.innerText = `⏳ ${selectedChar} is thinking...`;
+
+      // Get GPT response
+      const charData = characterMap[selectedChar];
+      const reply = await fetchOpenAIReply(userInput, charData.persona, memory, openaiKey);
+      memory.push(reply);
+
+      // Log character response
+      logMessage('response', selectedChar, reply);
+      output.innerText = reply;
+
+      // Generate audio using ttsMP3
+      output.innerText = `🔊 ${selectedChar} is speaking...`;
+      const audioUrl = await generateTTSMP3Audio(reply, charData.voice, ttsmp3Key);
+
+      // Play the audio
+      playAudio(audioUrl);
+      output.innerText = `✨ ${selectedChar}: ${reply}`;
+
+      // Clear input
+      document.getElementById('userInput').value = '';
+
+    } catch (error) {
+      console.error('Error:', error);
+      logMessage('error', 'Error', error.message);
+      output.innerText = `❌ Error: ${error.message}`;
+    } finally {
+      // Re-enable button
+      talkBtn.disabled = false;
+    }
+  }
+
+  // Allow Enter key to send message
+  document.getElementById('userInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      handleTalkClick();
+    }
+  });
+</script>
+</body>
+</html>
